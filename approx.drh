@@ -1,0 +1,24 @@
+[-2, 2] v;
+[-2, 2] x;
+[-2, 2] xref;
+[0, 10] t;
+[0, 10] time;
+
+{ mode 1;
+invt:
+    (x <= xref + 0.2);
+    (x >= xref - 0.2);
+flow:
+    d/dt[x] = v;
+    d/dt[v] = 0;
+    d/dt[t] = 1;
+    d/dt[xref] = cos(t);
+jump:
+    (x-xref)^2>0.033 ==> @1 (and (xref' = xref) (x' = x) (t' = t) (v'<2));
+}
+
+init:
+@1 (and (xref = 0) (x = 0) (t = 0));
+
+goal:
+@1 (and (t = 5.0));
