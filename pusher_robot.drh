@@ -1,0 +1,96 @@
+#define epsilon 0.00001
+
+[0, 100] time;
+
+// object
+[-5, 5] x;
+[-5, 5] y;
+
+// contact points for pushing
+[0, 10] n1;
+[0, 10] n2;
+[0, 10] n3;
+[0, 10] n4;
+
+// stationary
+{ mode 1;
+  invt:
+  flow:
+    d/dt[x] = 0;
+    d/dt[y] = 0;
+    d/dt[n1] = 0;
+    d/dt[n2] = 0;
+    d/dt[n3] = 0;
+    d/dt[n4] = 0;
+  jump:
+    (true) ==> @2 (and (x' = x) (y' = y) (n1' <= 10) (n2' <= 10) (n3' <= 10) (n4' <= 10));
+    (true) ==> @3 (and (x' = x) (y' = y) (n1' <= 10) (n2' <= 10) (n3' <= 10) (n4' <= 10));
+    (true) ==> @4 (and (x' = x) (y' = y) (n1' <= 10) (n2' <= 10) (n3' <= 10) (n4' <= 10));
+    (true) ==> @5 (and (x' = x) (y' = y) (n1' <= 10) (n2' <= 10) (n3' <= 10) (n4' <= 10));
+}
+
+// push on surface 1
+{ mode 2;
+  invt:
+  flow:
+    d/dt[x] = n1;
+    d/dt[y] = 0;
+    d/dt[n1] = 0;
+    d/dt[n2] = 0;
+    d/dt[n3] = 0;
+    d/dt[n4] = 0;
+  jump:
+    (true) ==> @1 (and (x' = x) (y' = y) (n1' = 0) (n2' = 0) (n3' = 0) (n4' = 0));
+    (true) ==> @2 (and (x' = x) (y' = y) (n1' < 100) (n2' = n2) (n3' = n3) (n4' = n4));
+}
+
+// push on surface 2
+{ mode 3;
+  invt:
+  flow:
+    d/dt[x] = 0;
+    d/dt[y] = n2;
+    d/dt[n1] = 0;
+    d/dt[n2] = 0;
+    d/dt[n3] = 0;
+    d/dt[n4] = 0;
+  jump:
+    (true) ==> @1 (and (x' = x) (y' = y) (n1' = 0) (n2' = 0) (n3' = 0) (n4' = 0));
+    (true) ==> @3 (and (x' = x) (y' = y) (n1' = n1) (n2' < 100) (n3' = n3) (n4' = n4));
+}
+
+// push on surface 3
+{ mode 4;
+  invt:
+  flow:
+    d/dt[x] = -n3;
+    d/dt[y] = 0;
+    d/dt[n1] = 0;
+    d/dt[n2] = 0;
+    d/dt[n3] = 0;
+    d/dt[n4] = 0;
+  jump:
+    (true) ==> @1 (and (x' = x) (y' = y) (n1' = 0) (n2' = 0) (n3' = 0) (n4' = 0));
+    (true) ==> @4 (and (x' = x) (y' = y) (n1' = n1) (n2' = n2) (n3' < 100) (n4' = n4));
+}
+
+// push on surface 4
+{ mode 5;
+  invt:
+  flow:
+    d/dt[x] = 0;
+    d/dt[y] = -n4;
+    d/dt[n1] = 0;
+    d/dt[n2] = 0;
+    d/dt[n3] = 0;
+    d/dt[n4] = 0;
+  jump:
+    (true) ==> @1 (and (x' = x) (y' = y) (n1' = 0) (n2' = 0) (n3' = 0) (n4' = 0));
+    (true) ==> @3 (and (x' = x) (y' = y) (n1' = n1) (n2' = 100) (n3' = n3) (n4' < 100));
+}
+
+init:
+@1	(and (x = 0) (y = 0));
+
+goal:
+@1	(and (x > 1) (y > 1));
