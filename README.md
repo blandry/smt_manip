@@ -1,1 +1,1 @@
-# smt-manip
+# Robotic manipulations using SMT solver dReal
