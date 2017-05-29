@@ -1,16 +1,26 @@
 #define epsilon 0.00001
+#define c 0.0001
 
-[0, 100] time;
+#define rox1_0 -0.5
+#define roy1_0 0.0
+#define rox2_0 0.0
+#define roy2_0 -0.5
+
+#define rox1 (cos(theta)*rox1_0 - sin(theta)*roy1_0)
+#define roy1 (sin(theta)*rox1_0 + cos(theta)*roy1_0)
+#define rox2 (cos(theta)*rox2_0 - sin(theta)*roy2_0)
+#define roy2 (sin(theta)*rox2_0 + cos(theta)*roy2_0)
+
+[0, 10] time;
 
 // object
 [-5, 5] x;
 [-5, 5] y;
+[-20, 20] theta;
 
 // contact points for pushing
-[0, 10] n1;
-[0, 10] n2;
-[0, 10] n3;
-[0, 10] n4;
+[-10, 10] vpx;
+[-10, 10] vpy;
 
 // stationary
 { mode 1;
@@ -18,79 +28,46 @@
   flow:
     d/dt[x] = 0;
     d/dt[y] = 0;
-    d/dt[n1] = 0;
-    d/dt[n2] = 0;
-    d/dt[n3] = 0;
-    d/dt[n4] = 0;
+    d/dt[theta] = 0;
+    d/dt[vpx] = 0;
+    d/dt[vpy] = 0;
   jump:
-    (true) ==> @2 (and (x' = x) (y' = y) (n1' <= 10) (n2' <= 10) (n3' <= 10) (n4' <= 10));
-    (true) ==> @3 (and (x' = x) (y' = y) (n1' <= 10) (n2' <= 10) (n3' <= 10) (n4' <= 10));
-    (true) ==> @4 (and (x' = x) (y' = y) (n1' <= 10) (n2' <= 10) (n3' <= 10) (n4' <= 10));
-    (true) ==> @5 (and (x' = x) (y' = y) (n1' <= 10) (n2' <= 10) (n3' <= 10) (n4' <= 10));
+    (true) ==> @2 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
+    (true) ==> @3 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
 }
 
 // push on surface 1
 { mode 2;
   invt:
+    (rox1*vpx+roy1*vpy)^2 >= 0.5*((rox1^2+roy1^2)*(vpx^2+vpy^2));
   flow:
-    d/dt[x] = n1;
-    d/dt[y] = 0;
-    d/dt[n1] = 0;
-    d/dt[n2] = 0;
-    d/dt[n3] = 0;
-    d/dt[n4] = 0;
+    d/dt[x] = ((c^2 + rox1^2)*vpx + rox1*roy1*vpy)/(c^2 + rox1^2 + roy1^2);
+    d/dt[y] = (rox1*roy1*vpx + (c^2 + roy1^2)*vpy)/(c^2 + rox1^2 + roy1^2);
+    d/dt[theta] = (rox1*((rox1*roy1*vpx + (c^2 + roy1^2)*vpy)/(c^2 + rox1^2 + roy1^2)) - roy1*(((c^2 + rox1^2)*vpx + rox1*roy1*vpy)/(c^2 + rox1^2 + roy1^2))) / c^2;
+    d/dt[vpx] = 0;
+    d/dt[vpy] = 0;
   jump:
-    (true) ==> @1 (and (x' = x) (y' = y) (n1' = 0) (n2' = 0) (n3' = 0) (n4' = 0));
-    (true) ==> @2 (and (x' = x) (y' = y) (n1' < 100) (n2' = n2) (n3' = n3) (n4' = n4));
+    (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' = 0) (vpy' = 0));
+    (true) ==> @2 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
 }
 
 // push on surface 2
 { mode 3;
   invt:
+    (rox2*vpx+roy2*vpy)^2 >= 0.5*((rox2^2+roy2^2)*(vpx^2+vpy^2));
   flow:
-    d/dt[x] = 0;
-    d/dt[y] = n2;
-    d/dt[n1] = 0;
-    d/dt[n2] = 0;
-    d/dt[n3] = 0;
-    d/dt[n4] = 0;
+    d/dt[x] = ((c^2 + rox2^2)*vpx + rox2*roy1*vpy)/(c^2 + rox2^2 + roy2^2);
+    d/dt[y] = (rox2*roy2*vpx + (c^2 + roy2^2)*vpy)/(c^2 + rox2^2 + roy2^2);
+    d/dt[theta] = (rox2*((rox2*roy2*vpx + (c^2 + roy2^2)*vpy)/(c^2 + rox2^2 + roy2^2)) - roy2*(((c^2 + rox2^2)*vpx + rox2*roy2*vpy)/(c^2 + rox2^2 + roy2^2))) / c^2;
+    d/dt[vpx] = 0;
+    d/dt[vpy] = 0;
   jump:
-    (true) ==> @1 (and (x' = x) (y' = y) (n1' = 0) (n2' = 0) (n3' = 0) (n4' = 0));
-    (true) ==> @3 (and (x' = x) (y' = y) (n1' = n1) (n2' < 100) (n3' = n3) (n4' = n4));
-}
-
-// push on surface 3
-{ mode 4;
-  invt:
-  flow:
-    d/dt[x] = -n3;
-    d/dt[y] = 0;
-    d/dt[n1] = 0;
-    d/dt[n2] = 0;
-    d/dt[n3] = 0;
-    d/dt[n4] = 0;
-  jump:
-    (true) ==> @1 (and (x' = x) (y' = y) (n1' = 0) (n2' = 0) (n3' = 0) (n4' = 0));
-    (true) ==> @4 (and (x' = x) (y' = y) (n1' = n1) (n2' = n2) (n3' < 100) (n4' = n4));
-}
-
-// push on surface 4
-{ mode 5;
-  invt:
-  flow:
-    d/dt[x] = 0;
-    d/dt[y] = -n4;
-    d/dt[n1] = 0;
-    d/dt[n2] = 0;
-    d/dt[n3] = 0;
-    d/dt[n4] = 0;
-  jump:
-    (true) ==> @1 (and (x' = x) (y' = y) (n1' = 0) (n2' = 0) (n3' = 0) (n4' = 0));
-    (true) ==> @3 (and (x' = x) (y' = y) (n1' = n1) (n2' = 100) (n3' = n3) (n4' < 100));
+    (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' = 0) (vpy' = 0));
+    (true) ==> @3 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
 }
 
 init:
-@1	(and (x = 0) (y = 0));
+@1	(and (x = 0) (y = 0) (theta = 0));
 
 goal:
 @1	(and (x > 1) (y > 1));
