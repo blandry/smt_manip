@@ -16,11 +16,11 @@
 #define roy1sq (0.5*(r1sq + (roy1_0^2 - rox1_0^2)*cos(2*theta) + 2*rox1_0*roy1_0*sin(2*theta)))
 #define roy2sq (0.5*(r2sq + (roy2_0^2 - rox2_0^2)*cos(2*theta) + 2*rox2_0*roy2_0*sin(2*theta)))
 
-[0, 5] time;
+[0, 10] time;
 // object
-[-2, 2] x;
-[-2, 2] y;
-[-10, 10] theta;
+[-5, 5] x;
+[-5, 5] y;
+[-20, 20] theta;
 // contact points for pushing
 [-10, 10] vpx;
 [-10, 10] vpy;
@@ -34,13 +34,12 @@
     d/dt[vpx] = 0;
     d/dt[vpy] = 0;
   jump:
-    (true) ==> @2 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpx' >= -10) (vpy' <= 10) (vpy' >= -10));
-    (true) ==> @3 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpx' >= -10) (vpy' <= 10) (vpy' >= -10));
+    (true) ==> @2 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
+    (true) ==> @3 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
 }
 // push on surface 1
 { mode 2;
   invt:
-    //(rox1*vpx+roy1*vpy)^2 >= 0.5*((rox1sq+roy1sq)*(vpx^2+vpy^2));
   flow:
     d/dt[x] = ((c^2 + rox1sq)*vpx + rox1roy1*vpy)/(c^2 + r1sq);
     d/dt[y] = (rox1roy1*vpx + (c^2 + roy1sq)*vpy)/(c^2 + r1sq);
@@ -48,13 +47,12 @@
     d/dt[vpx] = 0;
     d/dt[vpy] = 0;
   jump:
-    (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpx' >= -10) (vpy' <= 10) (vpy' >= -10));
-    (true) ==> @2 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpx' >= -10) (vpy' <= 10) (vpy' >= -10));
+    (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
+    (true) ==> @2 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
 }
 // push on surface 2
 { mode 3;
   invt:
-    //(rox2*vpx+roy2*vpy)^2 >= 0.5*((rox2sq+roy2sq)*(vpx^2+vpy^2));
   flow:
     d/dt[x] = ((c^2 + rox2sq)*vpx + rox2roy2*vpy)/(c^2 + r2sq);
     d/dt[y] = (rox2roy2*vpx + (c^2 + roy2sq)*vpy)/(c^2 + r2sq);
@@ -62,10 +60,10 @@
     d/dt[vpx] = 0;
     d/dt[vpy] = 0;
   jump:
-    (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpx' >= -10) (vpy' <= 10) (vpy' >= -10));
-    (true) ==> @3 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpx' >= -10) (vpy' <= 10) (vpy' >= -10));
+    (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
+    (true) ==> @3 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
 }
 init:
-@1  (and (x >= 0) (x <= 0.001) (y >= 0) (y <= 0.001) (theta >= 0) (theta <= 0.001) (vpx >= 0) (vpx <= 0.001) (vpy >= 0) (vpy <= 0.001));
+@1  (and (x = 0) (y = 0) (theta = 0));
 goal:
-@1  (and (x >= 0.1) (x <= 0.101));
+@1  (and (x > 1) (y > 1));
