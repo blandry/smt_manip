@@ -1,27 +1,29 @@
-#define epsilon 0.00001
-#define c 0.0001
-
+#define c 1
 #define rox1_0 -0.5
 #define roy1_0 0.0
+#define r1sq 0.25
 #define rox2_0 0.0
 #define roy2_0 -0.5
-
+#define r2sq 0.25
 #define rox1 (cos(theta)*rox1_0 - sin(theta)*roy1_0)
 #define roy1 (sin(theta)*rox1_0 + cos(theta)*roy1_0)
 #define rox2 (cos(theta)*rox2_0 - sin(theta)*roy2_0)
 #define roy2 (sin(theta)*rox2_0 + cos(theta)*roy2_0)
+#define rox1roy1 (rox1_0*roy1_0*cos(2*theta) + 0.5*(rox1_0^2 - roy1_0^2)*sin(2*theta))
+#define rox2roy2 (rox2_0*roy2_0*cos(2*theta) + 0.5*(rox2_0^2 - roy2_0^2)*sin(2*theta))
+#define rox1sq (0.5*(r1sq + (rox1_0^2 - roy1_0^2)*cos(2*theta) - 2*rox1_0*roy1_0*sin(2*theta)))
+#define rox2sq (0.5*(r2sq + (rox2_0^2 - roy2_0^2)*cos(2*theta) - 2*rox2_0*roy2_0*sin(2*theta)))
+#define roy1sq (0.5*(r1sq + (roy1_0^2 - rox1_0^2)*cos(2*theta) + 2*rox1_0*roy1_0*sin(2*theta)))
+#define roy2sq (0.5*(r2sq + (roy2_0^2 - rox2_0^2)*cos(2*theta) + 2*rox2_0*roy2_0*sin(2*theta)))
 
-[0, 10] time;
-
+[0, 5] time;
 // object
-[-5, 5] x;
-[-5, 5] y;
-[-20, 20] theta;
-
+[-2, 2] x;
+[-2, 2] y;
+[-10, 10] theta;
 // contact points for pushing
 [-10, 10] vpx;
 [-10, 10] vpy;
-
 // stationary
 { mode 1;
   invt:
@@ -32,42 +34,38 @@
     d/dt[vpx] = 0;
     d/dt[vpy] = 0;
   jump:
-    (true) ==> @2 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
-    (true) ==> @3 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
+    (true) ==> @2 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpx' >= -10) (vpy' <= 10) (vpy' >= -10));
+    (true) ==> @3 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpx' >= -10) (vpy' <= 10) (vpy' >= -10));
 }
-
 // push on surface 1
 { mode 2;
   invt:
-    (rox1*vpx+roy1*vpy)^2 >= 0.5*((rox1^2+roy1^2)*(vpx^2+vpy^2));
+    //(rox1*vpx+roy1*vpy)^2 >= 0.5*((rox1sq+roy1sq)*(vpx^2+vpy^2));
   flow:
-    d/dt[x] = ((c^2 + rox1^2)*vpx + rox1*roy1*vpy)/(c^2 + rox1^2 + roy1^2);
-    d/dt[y] = (rox1*roy1*vpx + (c^2 + roy1^2)*vpy)/(c^2 + rox1^2 + roy1^2);
-    d/dt[theta] = (rox1*((rox1*roy1*vpx + (c^2 + roy1^2)*vpy)/(c^2 + rox1^2 + roy1^2)) - roy1*(((c^2 + rox1^2)*vpx + rox1*roy1*vpy)/(c^2 + rox1^2 + roy1^2))) / c^2;
+    d/dt[x] = ((c^2 + rox1sq)*vpx + rox1roy1*vpy)/(c^2 + r1sq);
+    d/dt[y] = (rox1roy1*vpx + (c^2 + roy1sq)*vpy)/(c^2 + r1sq);
+    d/dt[theta] = (rox1*vpy - roy1*vpx)/(c^2 + r1sq);
     d/dt[vpx] = 0;
     d/dt[vpy] = 0;
   jump:
-    (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' = 0) (vpy' = 0));
-    (true) ==> @2 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
+    (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpx' >= -10) (vpy' <= 10) (vpy' >= -10));
+    (true) ==> @2 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpx' >= -10) (vpy' <= 10) (vpy' >= -10));
 }
-
 // push on surface 2
 { mode 3;
   invt:
-    (rox2*vpx+roy2*vpy)^2 >= 0.5*((rox2^2+roy2^2)*(vpx^2+vpy^2));
+    //(rox2*vpx+roy2*vpy)^2 >= 0.5*((rox2sq+roy2sq)*(vpx^2+vpy^2));
   flow:
-    d/dt[x] = ((c^2 + rox2^2)*vpx + rox2*roy1*vpy)/(c^2 + rox2^2 + roy2^2);
-    d/dt[y] = (rox2*roy2*vpx + (c^2 + roy2^2)*vpy)/(c^2 + rox2^2 + roy2^2);
-    d/dt[theta] = (rox2*((rox2*roy2*vpx + (c^2 + roy2^2)*vpy)/(c^2 + rox2^2 + roy2^2)) - roy2*(((c^2 + rox2^2)*vpx + rox2*roy2*vpy)/(c^2 + rox2^2 + roy2^2))) / c^2;
+    d/dt[x] = ((c^2 + rox2sq)*vpx + rox2roy2*vpy)/(c^2 + r2sq);
+    d/dt[y] = (rox2roy2*vpx + (c^2 + roy2sq)*vpy)/(c^2 + r2sq);
+    d/dt[theta] = (rox2*vpy - roy2*vpx)/(c^2 + r2sq);
     d/dt[vpx] = 0;
     d/dt[vpy] = 0;
   jump:
-    (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' = 0) (vpy' = 0));
-    (true) ==> @3 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpy' <= 10));
+    (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpx' >= -10) (vpy' <= 10) (vpy' >= -10));
+    (true) ==> @3 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 10) (vpx' >= -10) (vpy' <= 10) (vpy' >= -10));
 }
-
 init:
-@1	(and (x = 0) (y = 0) (theta = 0));
-
+@1  (and (x >= 0) (x <= 0.001) (y >= 0) (y <= 0.001) (theta >= 0) (theta <= 0.001) (vpx >= 0) (vpx <= 0.001) (vpy >= 0) (vpy <= 0.001));
 goal:
-@1	(and (x > 1) (y > 1));
+@1  (and (x >= 0.1) (x <= 0.101));

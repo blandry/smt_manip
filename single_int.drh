@@ -1,0 +1,54 @@
+[0, 5] time;
+
+// object
+[-5, 5] x;
+[-5, 5] y;
+
+// contact points for grasps
+[-10, 10] n1;
+[-10, 10] n2;
+
+// stationary
+{ mode 1;
+  invt:
+  flow:
+    d/dt[x] = 0;
+    d/dt[y] = 0;
+    d/dt[n1] = 0;
+    d/dt[n2] = 0;
+  jump:
+    (true) ==> @2 (and (x' = x) (y' = y) (n1' <= 10) (n2' <= 10));
+    (true) ==> @3 (and (x' = x) (y' = y) (n1' <= 10) (n2' <= 10));
+}
+
+// grasp 1
+{ mode 2;
+  invt:
+  flow:
+    d/dt[x] = n1;
+    d/dt[y] = 0;
+    d/dt[n1] = 0;
+    d/dt[n2] = 0;
+  jump:
+    (true) ==> @1 (and (x' = x) (y' = y) (n1' = 0) (n2' = 0));
+    (true) ==> @2 (and (x' = x) (y' = y) (n1' < 10) (n2' < 10));
+}
+
+// grasp 2
+{ mode 3;
+  invt:
+  flow:
+    d/dt[x] = 0;
+    d/dt[y] = n2;
+    d/dt[n1] = 0;
+    d/dt[n2] = 0;
+  jump:
+    (true) ==> @1 (and (x' = x) (y' = y) (n1' = 0) (n2' = 0));
+    (true) ==> @3 (and (x' = x) (y' = y) (n1' < 10) (n2' < 10));
+}
+
+init:
+@1	(and (x = 0) (y = 0));
+
+goal:
+@1	(and (x > 1) (y > 1));
