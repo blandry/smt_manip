@@ -17,3 +17,4 @@ and run at the command line
 ```
 > julia generate_pusher_problem.jl
 ```
+The directory `dircol` contains the transcription of `push_test.drh` as a multi-phase direct collocation optimization problem. You will need [opty](https://github.com/csu-hmc/opty) and [IPOPT](https://projects.coin-or.org/Ipopt) in order to run it.
