@@ -1,0 +1,128 @@
+#define c (0.38259785823210635)
+#define rox1_b (0.0)
+#define roy1_b (-0.5)
+#define r1sq (0.25)
+#define rox2_b (0.5)
+#define roy2_b (0.0)
+#define r2sq (0.25)
+#define rox3_b (0.0)
+#define roy3_b (0.5)
+#define r3sq (0.25)
+#define rox4_b (-0.5)
+#define roy4_b (0.0)
+#define r4sq (0.25)
+#define rox1_w (cos(theta)*rox1_b - sin(theta)*roy1_b)
+#define roy1_w (sin(theta)*rox1_b + cos(theta)*roy1_b)
+#define rox2_w (cos(theta)*rox2_b - sin(theta)*roy2_b)
+#define roy2_w (sin(theta)*rox2_b + cos(theta)*roy2_b)
+#define rox3_w (cos(theta)*rox3_b - sin(theta)*roy3_b)
+#define roy3_w (sin(theta)*rox3_b + cos(theta)*roy3_b)
+#define rox4_w (cos(theta)*rox4_b - sin(theta)*roy4_b)
+#define roy4_w (sin(theta)*rox4_b + cos(theta)*roy4_b)
+#define rox1roy1 (rox1_b*roy1_b*cos(2*theta) + 0.5*(rox1_b^2 - roy1_b^2)*sin(2*theta))
+#define rox1sq (0.5*(r1sq + (rox1_b^2 - roy1_b^2)*cos(2*theta) - 2*rox1_b*roy1_b*sin(2*theta)))
+#define roy1sq (0.5*(r1sq + (roy1_b^2 - rox1_b^2)*cos(2*theta) + 2*rox1_b*roy1_b*sin(2*theta)))
+#define rox2roy2 (rox2_b*roy2_b*cos(2*theta) + 0.5*(rox2_b^2 - roy2_b^2)*sin(2*theta))
+#define rox2sq (0.5*(r2sq + (rox2_b^2 - roy2_b^2)*cos(2*theta) - 2*rox2_b*roy2_b*sin(2*theta)))
+#define roy2sq (0.5*(r2sq + (roy2_b^2 - rox2_b^2)*cos(2*theta) + 2*rox2_b*roy2_b*sin(2*theta)))
+#define rox3roy3 (rox3_b*roy3_b*cos(2*theta) + 0.5*(rox3_b^2 - roy3_b^2)*sin(2*theta))
+#define rox3sq (0.5*(r3sq + (rox3_b^2 - roy3_b^2)*cos(2*theta) - 2*rox3_b*roy3_b*sin(2*theta)))
+#define roy3sq (0.5*(r3sq + (roy3_b^2 - rox3_b^2)*cos(2*theta) + 2*rox3_b*roy3_b*sin(2*theta)))
+#define rox4roy4 (rox4_b*roy4_b*cos(2*theta) + 0.5*(rox4_b^2 - roy4_b^2)*sin(2*theta))
+#define rox4sq (0.5*(r4sq + (rox4_b^2 - roy4_b^2)*cos(2*theta) - 2*rox4_b*roy4_b*sin(2*theta)))
+#define roy4sq (0.5*(r4sq + (roy4_b^2 - rox4_b^2)*cos(2*theta) + 2*rox4_b*roy4_b*sin(2*theta)))
+
+[0, 10] time;
+// center of mass (x, y) bounds
+[-5, 5] x;
+[-5, 5] y;
+[-20, 20] theta;
+// quasistatic pushing velocity bounds
+[-1.0, 1.0] vpx;
+[-1.0, 1.0] vpy;
+
+// stationary
+{ mode 1;
+    invt:
+    flow:
+        d/dt[x] = 0;
+        d/dt[y] = 0;
+        d/dt[theta] = 0;
+        d/dt[vpx] = 0;
+        d/dt[vpy] = 0;
+    jump:
+        (true) ==> @2 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 1.0) (vpy' <= 1.0));
+        (true) ==> @3 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 1.0) (vpy' <= 1.0));
+        (true) ==> @4 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 1.0) (vpy' <= 1.0));
+        (true) ==> @5 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 1.0) (vpy' <= 1.0));
+}
+
+// pushing on point 1 = [0.0, -0.5]
+{ mode 2;
+    invt:
+        (vpx*1.0 + vpy*0.0)^2 <= 0.030153689607045803*(vpx^2 + vpy^2)*1.0;
+        -vpx*0.0 + vpy*1.0 > 0;
+    flow:
+        d/dt[x] = ((c^2 + rox1sq)*vpx + rox1roy1*vpy)/(c^2 + r1sq);
+        d/dt[y] = (rox1roy1*vpx + (c^2 + roy1sq)*vpy)/(c^2 + r1sq);
+        d/dt[theta] = 0*(rox1_w*vpy - roy1_w*vpx)/(c^2 + r1sq);
+        d/dt[vpx] = 0;
+        d/dt[vpy] = 0;
+    jump:
+        (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 1.0) (vpy' <= 1.0));
+        //(true) ==> @2 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 1.0) (vpy' <= 1.0));
+}
+
+// pushing on point 2 = [0.5, 0.0]
+{ mode 3;
+    invt:
+        (vpx*0.0 + vpy*1.0)^2 <= 0.030153689607045803*(vpx^2 + vpy^2)*1.0;
+        -vpx*1.0 + vpy*0.0 > 0;
+    flow:
+        d/dt[x] = ((c^2 + rox2sq)*vpx + rox2roy2*vpy)/(c^2 + r2sq);
+        d/dt[y] = (rox2roy2*vpx + (c^2 + roy2sq)*vpy)/(c^2 + r2sq);
+        d/dt[theta] = 0*(rox2_w*vpy - roy2_w*vpx)/(c^2 + r2sq);
+        d/dt[vpx] = 0;
+        d/dt[vpy] = 0;
+    jump:
+        (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 1.0) (vpy' <= 1.0));
+        //(true) ==> @3 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 1.0) (vpy' <= 1.0));
+}
+
+// pushing on point 3 = [0.0, 0.5]
+{ mode 4;
+    invt:
+        (vpx*-1.0 + vpy*0.0)^2 <= 0.030153689607045803*(vpx^2 + vpy^2)*1.0;
+        -vpx*0.0 + vpy*-1.0 > 0;
+    flow:
+        d/dt[x] = ((c^2 + rox3sq)*vpx + rox3roy3*vpy)/(c^2 + r3sq);
+        d/dt[y] = (rox3roy3*vpx + (c^2 + roy3sq)*vpy)/(c^2 + r3sq);
+        d/dt[theta] = 0*(rox3_w*vpy - roy3_w*vpx)/(c^2 + r3sq);
+        d/dt[vpx] = 0;
+        d/dt[vpy] = 0;
+    jump:
+        (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 1.0) (vpy' <= 1.0));
+        //(true) ==> @4 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 1.0) (vpy' <= 1.0));
+}
+
+// pushing on point 4 = [-0.5, 0.0]
+{ mode 5;
+    invt:
+        (vpx*0.0 + vpy*-1.0)^2 <= 0.030153689607045803*(vpx^2 + vpy^2)*1.0;
+        -vpx*-1.0 + vpy*0.0 > 0;
+    flow:
+        d/dt[x] = ((c^2 + rox4sq)*vpx + rox4roy4*vpy)/(c^2 + r4sq);
+        d/dt[y] = (rox4roy4*vpx + (c^2 + roy4sq)*vpy)/(c^2 + r4sq);
+        d/dt[theta] = 0*(rox4_w*vpy - roy4_w*vpx)/(c^2 + r4sq);
+        d/dt[vpx] = 0;
+        d/dt[vpy] = 0;
+    jump:
+        (true) ==> @1 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 1.0) (vpy' <= 1.0));
+        //(true) ==> @5 (and (x' = x) (y' = y) (theta' = theta) (vpx' <= 1.0) (vpy' <= 1.0));
+}
+
+
+init:
+@1  (and (x = 0) (y = 0) (theta = 0));
+goal:
+@1  (and (x > 3) (y > 1));
